@@ -14,45 +14,63 @@ class DiamondTest extends TestCase
         $this->diamond = new Diamond();
     }
 
-    public function testWithA(): void
+    public function testGetTemplate(): void
     {
-        self::assertEquals("A\n", $this->diamond->draw('A'));
+        self::assertEquals('A', $this->diamond->getTemplate('A'));
+        self::assertEquals('FEDCBABCDEF', $this->diamond->getTemplate('F'));
+        $this->assertEquals('ZYXWVUTSRQPONMLKJIHGFEDCBABCDEFGHIJKLMNOPQRSTUVWXYZ', $this->diamond->getTemplate('Z'));
     }
 
-    public function testWithB()
+    public function testPurge()
+    {
+        self::assertEquals('A', $this->diamond->purge('A', 'A'));
+        self::assertEquals('..A..', $this->diamond->purge('BCARG', 'A'));
+        self::assertEquals('A.A.A', $this->diamond->purge('ACARA', 'A'));
+    }
+
+    /**
+     * @dataProvider figureProvider
+     */
+    public function testDraw($figure, $diamondEdge): void
     {
         self::assertEquals(
-            ".A.\n".
-            "B.B\n".
-            ".A.\n",
-            $this->diamond->draw('B')
+            $figure,
+            $this->diamond->draw($diamondEdge)
         );
     }
 
-    public function testWithC(): void
+    public function figureProvider(): \Generator
     {
-        self::assertEquals(
+        $figure = "A\n";
+
+        yield [$figure, 'A'];
+
+        $figure =
+            ".A.\n".
+            "B.B\n".
+            ".A.\n";
+
+        yield [$figure, 'B'];
+
+        $figure =
             "..A..\n".
             ".B.B.\n".
             "C...C\n".
             ".B.B.\n".
-            "..A..\n",
-            $this->diamond->draw('C')
-        );
-    }
+            "..A..\n";
 
-    public function testWithD(): void
-    {
-        self::assertEquals(
-            "...A...\n".
-            "..B.B..\n".
-            ".C...C.\n".
-            "D.....D\n".
-            ".C...C.\n".
-            "..B.B..\n".
-            "...A...\n",
-            $this->diamond->draw('D')
-        );
+        yield [$figure, 'C'];
+
+        $figure =
+            "...A...\n" .
+            "..B.B..\n" .
+            ".C...C.\n" .
+            "D.....D\n" .
+            ".C...C.\n" .
+            "..B.B..\n" .
+            "...A...\n";
+
+        yield [$figure, 'D'];
     }
 
     public function testComplete(): void

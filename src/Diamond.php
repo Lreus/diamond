@@ -4,6 +4,8 @@ namespace App;
 
 class Diamond
 {
+    const REGEX_ANY_CHAR_MISSING_FROM_LIST = "/[^%s]/";
+    const REGEX_ANY_SINGLE_CHAR_IN_LIST = "/[%s]/";
     private string $legend;
     private string $filler;
 
@@ -15,24 +17,24 @@ class Diamond
 
     public function draw(string $letter): string
     {
-        $template = $this->buildDiamondTemplate($letter);
+        $template = $this->getTemplate($letter);
 
         $diamond = $this->buildDiamondLines($letter, $template);
 
-        return implode("\n", $diamond)."\n";
+        return implode(PHP_EOL, $diamond).PHP_EOL;
 
     }
 
-    private function buildDiamondTemplate(string $letter): string
+    public function getTemplate(string $char): string
     {
-        $rightPart = $this->truncateLegend($letter);
+        $rightPart = $this->truncateLegend($char);
 
         return $this->mirror($rightPart);
     }
 
     private function truncateLegend(string $limit): string
     {
-        $pattern = sprintf("/[%s]/", $limit);
+        $pattern = sprintf(self::REGEX_ANY_SINGLE_CHAR_IN_LIST, $limit);
         $split = preg_split($pattern, $this->legend);
         return $split[0] . $limit;
     }
@@ -51,7 +53,7 @@ class Diamond
     private function buildDiamondLines(string $letter, string $template): array
     {
         $top = $this->buildTopLines($letter, $template);
-        $middle = $this->filterWithChar($letter, $template);
+        $middle = $this->purge($template, $letter);
         $bottom = array_reverse($top);
 
         return array_merge($top, [$middle], $bottom);
@@ -65,17 +67,17 @@ class Diamond
         $top = [];
         $i = 0;
         while ($this->legend[$i] !== $letter) {
-            $top[] = $this->filterWithChar($this->legend[$i], $template);
+            $top[] = $this->purge($template, $this->legend[$i]);
             $i++;
         }
 
         return $top;
     }
 
-    private function filterWithChar(string $keptChar, string $template): string
+    public function purge(string $source, string $keep): string
     {
-        $pattern = sprintf("/[^%s]/", $keptChar);
+        $pattern = sprintf(self::REGEX_ANY_CHAR_MISSING_FROM_LIST, $keep);
 
-        return preg_replace($pattern, $this->filler, $template);
+        return preg_replace($pattern, $this->filler, $source);
     }
 }
